@@ -7,6 +7,8 @@
 #include <unistd.h>
 #include <sys/time.h>
 
+pthread_mutex_t *forks;
+
 typedef struct philo{
     int     nphilos;
 }               t_philo;
