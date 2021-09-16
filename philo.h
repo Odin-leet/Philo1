@@ -7,10 +7,13 @@
 #include <unistd.h>
 #include <sys/time.h>
 
-pthread_mutex_t *forks;
+
 
 typedef struct philo{
     int     nphilos;
+    int     numofphilo;
+    pthread_mutex_t *forks;
+    int     index;
 }               t_philo;
 
 
