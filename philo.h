@@ -12,6 +12,9 @@
 typedef struct philo{
     int     nphilos;
     int     numofphilo;
+    int     timetodie;
+    int     timetoeat;
+    int     timetosleep;
     pthread_mutex_t *forks;
     int     index;
 }               t_philo;
