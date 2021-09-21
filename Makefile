@@ -1,6 +1,6 @@
 NAME =	philo
 
-SRC =	philo.c\
+SRC =	philo1.c\
 		
 
 

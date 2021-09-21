@@ -17,6 +17,7 @@ typedef struct philo{
     int     timetosleep;
     pthread_mutex_t *forks;
     int     index;
+    int     reminder;
 }               t_philo;
 
 
