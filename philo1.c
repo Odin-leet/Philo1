@@ -1,10 +1,33 @@
 #include "philo.h"
 
+long int      timepassed(long int strat)
+{
+    struct timeval right;
+
+    return((right.tv_sec * 1000) + (right.tv_usec / 1000) - start)
+}
+
+
 long int  time_diff(struct timeval *start, struct timeval *end)
 {
     return ((end->tv_sec - start->tv_sec) / 1e-6) +  (end->tv_usec - start->tv_usec);
 }
 
+
+int    checktab(int *tab, int j, int c)
+{
+    int i;
+
+    i = 0;
+    while (i < j)
+    {
+        if (tab[i] >= c)
+        i++;
+        else
+        return 0;
+    }
+    return(1);
+}
 void    *routine(void *arg)
 {
  
@@ -37,8 +60,14 @@ void    *routine(void *arg)
         pthread_mutex_unlock(&pl->print);
         pthread_mutex_lock(&pl->print);
         printf("philosopher %d is eating \n",index +1);
-        pthread_mutex_unlock(&pl->print);
         usleep(pl->timetoeat * 1000);
+        pl->tab[index]++;
+        if(checktab(pl->tab, pl->numofphilo, pl->timesme) == 1)
+        {
+            printf("all the philos eat the times must eat\n");
+            break;
+        }
+        pthread_mutex_unlock(&pl->print);
         pthread_mutex_unlock(&pl->forks[index]);
         pthread_mutex_unlock(&pl->forks[(index + 1) % pl->numofphilo]);
         pthread_mutex_lock(&pl->print);
@@ -51,11 +80,17 @@ void    *routine(void *arg)
 
 void    gettinginfos(char **argv, t_philo *gl)
 {
+    struct timeval now;
+
+    gettimeofday(&now,NULL);
     gl->numofphilo = atoi(argv[1]);
     gl->timetodie = atoi(argv[2]);
     gl->timetoeat = atoi(argv[3]);
     gl->timetosleep = atoi(argv[4]);
     gl->reminder = 0;
+    gl->timesme = 0;
+    gl->start = ((now.tv_sec * 1000)  + (now.tv_usec / 1000));
+    
 }
 
 int main(int argc, char **argv)
@@ -63,8 +98,16 @@ int main(int argc, char **argv)
     t_philo gl;
     int     j;
     pthread_t   thread[atoi(argv[1])];
-
     gettinginfos(argv, &gl);
+    printf("argc = %d\n",argc);
+    if (argc == 6)
+    {
+        gl.timesme = 1;
+        gl.tab = malloc(sizeof(int) * gl.numofphilo);
+        j = -1;
+        while (++j < gl.numofphilo)
+        gl.tab[j] = 0;
+    }
     gl.dl = malloc(sizeof(t_data*) * gl.numofphilo);   
     gl.forks = malloc(sizeof(pthread_mutex_t) * gl.numofphilo);
     j = 0;
