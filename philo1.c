@@ -1,10 +1,10 @@
 #include "philo.h"
 
-long int      timepassed(long int strat)
-{
+long int      timepassed(long int start)
+{   
     struct timeval right;
-
-    return((right.tv_sec * 1000) + (right.tv_usec / 1000) - start)
+    gettimeofday(&right, NULL);
+    return((right.tv_sec * 1000) + (right.tv_usec / 1000) - start);
 }
 
 
@@ -22,7 +22,10 @@ int    checktab(int *tab, int j, int c)
     while (i < j)
     {
         if (tab[i] >= c)
-        i++;
+        {
+            i++;
+        }
+        
         else
         return 0;
     }
@@ -43,7 +46,7 @@ void    *routine(void *arg)
         gettimeofday(&pl->dl[index].start, NULL); 
         pthread_mutex_lock(&pl->forks[index]);
         pthread_mutex_lock(&pl->print);
-        printf("philosopher %d took the right fork\n",index  + 1);
+        printf("%ld philosopher %d took the right fork\n",timepassed(pl->start),index  + 1);
         pthread_mutex_unlock(&pl->print);
         pthread_mutex_lock(&pl->forks[(index + 1) % pl->numofphilo] );
         gettimeofday(&pl->dl[index].end,NULL);
@@ -56,25 +59,31 @@ void    *routine(void *arg)
             break;
         }
         pthread_mutex_lock(&pl->print);
-        printf("philosopher %d took the left fork\n",index + 1);
-        pthread_mutex_unlock(&pl->print);
-        pthread_mutex_lock(&pl->print);
-        printf("philosopher %d is eating \n",index +1);
+        printf("%ld philosopher %d took the left fork\n",timepassed(pl->start),index + 1);
+        printf("%ld philosopher %d is eating \n",timepassed(pl->start),index +1);
+       pthread_mutex_unlock(&pl->print);
         usleep(pl->timetoeat * 1000);
+         pthread_mutex_unlock(&pl->forks[index]);
+        pthread_mutex_unlock(&pl->forks[(index + 1) % pl->numofphilo]);
+        
+     \
+        
+        if(pl->timesme == 1)
         pl->tab[index]++;
-        if(checktab(pl->tab, pl->numofphilo, pl->timesme) == 1)
+        if (pl->timesme == 1)
+        if(checktab(pl->tab, pl->numofphilo, pl->timesme2) == 1)
         {
-            printf("all the philos eat the times must eat\n");
+            pthread_mutex_lock(&pl->print);
+            printf("all the philos eat the times must eat %d\n ",pl->timesme2);
             break;
         }
-        pthread_mutex_unlock(&pl->print);
-        pthread_mutex_unlock(&pl->forks[index]);
-        pthread_mutex_unlock(&pl->forks[(index + 1) % pl->numofphilo]);
+        
+       
         pthread_mutex_lock(&pl->print);
-        printf("philosopher %d is sleeping\n",index + 1);
+        printf("%ld philosopher %d is sleeping\n",timepassed(pl->start),index + 1);
         pthread_mutex_unlock(&pl->print);
         usleep(pl->timetosleep * 1000);
-    }
+    } 
     return (NULL);
 }
 
@@ -103,6 +112,7 @@ int main(int argc, char **argv)
     if (argc == 6)
     {
         gl.timesme = 1;
+        gl.timesme2 = atoi(argv[5]);
         gl.tab = malloc(sizeof(int) * gl.numofphilo);
         j = -1;
         while (++j < gl.numofphilo)
@@ -116,6 +126,8 @@ int main(int argc, char **argv)
     {
          pthread_mutex_init(&gl.forks[j],NULL);
          j++;
+         if (gl.reminder == 1)
+        return(0);
     }
     j = 0;
     while(j < gl.numofphilo)
@@ -130,11 +142,14 @@ int main(int argc, char **argv)
         }
         j++;
     }
-    j = 0;
+
+   j = 0;
     while (j <  gl.numofphilo)
     {
         pthread_join(thread[j], NULL);
         j++;
+        if (gl.reminder == 1)
+        return(0);
     }
     return (0); 
 }

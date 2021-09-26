@@ -21,11 +21,12 @@ typedef struct philo{
     int     timetoeat;
     int     timetosleep;
     int     timesme;
+    int     timesme2;
     pthread_mutex_t *forks;
     pthread_mutex_t print;
     int     index;
     int     reminder;
-    int     start;
+    long int    start;
     int     *tab;
     t_data  *dl;
 }               t_philo;
