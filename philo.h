@@ -11,7 +11,7 @@
 typedef struct  data{
     int         pid;
     struct timeval start;
-    struct timeval end;
+    long int end;
     int     timetoeat;
 } t_data;
 
