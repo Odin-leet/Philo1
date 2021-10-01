@@ -5,28 +5,42 @@ void	checktte(t_philo *gl, char **argv)
 	int	j;
 
 	gl->timesme = 1;
-	gl->timesme2 = ft_atoi(argv[5]);
 	gl->tab = malloc(sizeof(int) * gl->numofphilo);
 	j = -1;
 	while (++j < gl->numofphilo)
 		gl->tab[j] = 0;
 }
 
-void	gettinginfos(char **argv, t_philo *gl)
+int	gettinginfos(char **argv, int argc, t_philo *gl)
 {
 	struct timeval	now;
 	int				i;
 
 	i = 0;
+	if (argc != 6 && argc != 5)
+		return (0);
 	gettimeofday(&now, NULL);
-	gl->numofphilo = ft_atoi(argv[1]);
-	gl->timetodie = ft_atoi(argv[2]);
-	gl->timetoeat = ft_atoi(argv[3]);
-	gl->timetosleep = ft_atoi(argv[4]);
+	if (!ft_atoi(argv[1], &gl->numofphilo))
+		return (0);
+	if (!ft_atoi(argv[2], &gl->timetodie))
+		return (0);
+	if (!ft_atoi(argv[3], &gl->timetoeat))
+		return (0);
+	if (!ft_atoi(argv[4], &gl->timetosleep))
+		return (0);
+	if (argc == 6)
+	{
+		if (!ft_atoi(argv[5], &gl->timesme2))
+		return (0);
+		checktte(gl, argv);
+	}
 	gl->reminder = 0;
 	gl->index = 0;
 	gl->timesme = 0;
 	gl->start = ((now.tv_sec * 1000) + (now.tv_usec / 1000));
+	gl->dl = malloc(sizeof(t_data) * gl->numofphilo);
+	traitingtreads(gl, argv);
+	return (1);
 }
 
 void	eating(t_philo *rl, int index)
@@ -69,11 +83,13 @@ void	*routine(void *arg)
 	return (NULL);
 }
 
-void	traitingtreads(t_philo *gl, char **argv)
+int	traitingtreads(t_philo *gl, char **argv)
 {
 	int			j;
 	pthread_t	*thread;
 
+	if (gl->numofphilo == 0)
+		return (0);
 	thread = malloc(sizeof(pthread_t) * gl->numofphilo);
 	gl->forks = malloc(sizeof(pthread_mutex_t) * gl->numofphilo);
 	j = -1;
@@ -89,4 +105,5 @@ void	traitingtreads(t_philo *gl, char **argv)
 		pthread_create(&thread[j], NULL, &routine, gl);
 		usleep(100);
 	}
+	return (1);
 }

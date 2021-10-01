@@ -10,33 +10,27 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "philo.h"
+#include <limits.h>
 
-int	ft_atoi(const char *str)
+int	ft_atoi(char *str, int *number)
 {
-	long	res;
-	int		nav;
-	int		sign;
+	long	result;
 
-	nav = 0;
-	sign = 1;
-	res = 0;
-	while (str[nav] == 32 || (str[nav] >= 9 && str[nav] <= 13 && str[nav]))
-		nav++;
-	if (str[nav] == '-')
+	result = 0;
+	if (*str == '-')
+		return (0);
+	if (*str == '+')
+		str++;
+	while (*str)
 	{
-		sign = -1;
-		nav++;
-	}
-	else if (str[nav] == '+')
-		nav++;
-	while (str[nav] >= '0' && str[nav] <= '9')
-	{
-		if (res < 0 && sign < 0)
+		if (*str >= '0' && *str <= '9')
+			result = result * 10 + (*str - '0');
+		else
 			return (0);
-		else if (res < 0 && sign > 0)
-			return (-1);
-		res = res * 10 + str[nav++] - '0';
+		str++;
 	}
-	return (res * sign);
+	if (result > INT_MAX)
+		return (0);
+	*number = result;
+	return (1);
 }

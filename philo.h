@@ -26,16 +26,17 @@ typedef struct philo{
 	int				*tab;
 	t_data			*dl;
 }				t_philo;
-int			ft_atoi(const char *str);
+int			ft_atoi(char *str, int *number);
 void		checktte(t_philo *gl, char **argv);
-void		gettinginfos(char **argv, t_philo *gl);
+int			gettinginfos(char **argv, int argc, t_philo *gl);
 void		eating(t_philo *rl, int index);
 void		*routine(void *arg);
-void		traitingtreads(t_philo *gl, char **argv);
+int			traitingtreads(t_philo *gl, char **argv);
 long int	timepassed(long int start);
 void		mysleep(int time);
 long int	time_now(void);
 void		sleeping(t_philo *rl, int index);
 int			checktab(int *tab, int j, int c);
+
 
 #endif
