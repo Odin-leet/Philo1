@@ -6,7 +6,7 @@
 /*   By: aali-mou <aali-mou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/01 18:40:46 by aali-mou          #+#    #+#             */
-/*   Updated: 2021/10/02 10:52:18 by aali-mou         ###   ########.fr       */
+/*   Updated: 2021/10/02 17:55:54 by aali-mou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,8 +18,6 @@
 # include <pthread.h>
 # include <unistd.h>
 # include <sys/time.h>
-
-
 
 typedef struct philo{
 	int				numofphilo;
@@ -37,9 +35,8 @@ typedef struct philo{
 	int				reminder;
 	long int		start;
 	int				check2;
-	long int	*end;
-	int			*check1;
-	
+	long int		*end;
+	int				*check1;	
 }				t_philo;
 
 int			ft_atoi(char *str, int *number);
