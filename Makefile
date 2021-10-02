@@ -17,7 +17,7 @@ all : $(NAME)
 
 $(NAME) : ${OBJS}
 		
-		$(CC) $(SRC) -o  $(NAME) -g3 
+		$(CC)  -Wall -Wextra -Werror  $(SRC) -o  $(NAME) 
 
 clean:
 	@rm -rf $(OBJS)

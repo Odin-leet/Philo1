@@ -1,22 +1,29 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   philo3.c                                           :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: aali-mou <aali-mou@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2021/10/01 18:40:32 by aali-mou          #+#    #+#             */
+/*   Updated: 2021/10/02 15:20:40 by aali-mou         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "philo.h"
 
-void	checktte(t_philo *gl, char **argv)
+void	printing(t_philo *pl, int index, char *s)
 {
-	int	j;
-
-	gl->timesme = 1;
-	gl->tab = malloc(sizeof(int) * gl->numofphilo);
-	j = -1;
-	while (++j < gl->numofphilo)
-		gl->tab[j] = 0;
+	pthread_mutex_lock(&pl->print);
+			printf("%ld philosopher %d %s\n",
+					timepassed(pl->start), index + 1, s);
+		pthread_mutex_unlock(&pl->print);
 }
 
 int	gettinginfos(char **argv, int argc, t_philo *gl)
 {
 	struct timeval	now;
-	int				i;
-
-	i = 0;
+	
 	if (argc != 6 && argc != 5)
 		return (0);
 	gettimeofday(&now, NULL);
@@ -30,45 +37,42 @@ int	gettinginfos(char **argv, int argc, t_philo *gl)
 		return (0);
 	if (argc == 6)
 	{
+		gl->timesme = 1;
 		if (!ft_atoi(argv[5], &gl->timesme2))
-		return (0);
-		checktte(gl, argv);
+			return (0);
 	}
-	gl->reminder = 0;
-	gl->index = 0;
-	gl->timesme = 0;
-	gl->start = ((now.tv_sec * 1000) + (now.tv_usec / 1000));
-	gl->dl = malloc(sizeof(t_data) * gl->numofphilo);
-	traitingtreads(gl, argv);
+	intialisation(gl);
+	gl->start = time_now();
+	gl->check1 = (int* )malloc(sizeof(int) * gl->numofphilo);
+	gl->end = (long int* )malloc(sizeof(long int) * gl->numofphilo);
+	traitingtreads(gl);
 	return (1);
 }
 
-void	eating(t_philo *rl, int index)
+void	eating(t_philo *pl, int index)
 {
-	pthread_mutex_lock(&rl->forks[index]);
-	pthread_mutex_lock(&rl->print);
-	printf("%ld philosopher %d took the right fork\n",
-		timepassed(rl->start), index + 1);
-	pthread_mutex_unlock(&rl->print);
-	pthread_mutex_lock(&rl->forks[(index + 1) % rl->numofphilo]);
-	pthread_mutex_lock(&rl->print);
-	printf("%ld philosopher %d took the left fork\n",
-		timepassed(rl->start), index + 1);
-	pthread_mutex_unlock(&rl->print);
-	pthread_mutex_lock(&rl->print);
-	printf("%ld philosopher %d is eating --  \n",
-		timepassed(rl->start), index + 1);
-	pthread_mutex_unlock(&rl->print);
-	rl->dl[index].end = time_now();
-	mysleep(rl->timetoeat);
-	pthread_mutex_unlock(&rl->forks[index]);
-	pthread_mutex_unlock(&rl->forks[(index + 1) % rl->numofphilo]);
+		pthread_mutex_lock(&pl->forks[index]);
+		if(pl->p)
+		printing(pl, index, "took the right fork");
+		pthread_mutex_lock(&pl->forks[(index + 1) % pl->numofphilo]);
+		if(pl->p)
+		printing(pl, index, "took the left for");
+		if(pl->p)
+		printing(pl, index, "is eating ");
+		pl->end[index] = time_now();
+		pl->iseating[index] = 1;
+		mysleep(pl->timetoeat);
+		pl->iseating[index] = 0;
+		pthread_mutex_unlock(&pl->forks[index]);
+		pthread_mutex_unlock(&pl->forks[(index + 1) % pl->numofphilo]);
+		pl->check1[index]++;
+		if (pl->check1[index] >= pl->timesme2)
+			pl->check2++;
 }
 
 void	*routine(void *arg)
 {
 	int		index;
-	int		time_diff1;
 	t_philo	*pl;
 
 	pl = (t_philo *)arg;
@@ -76,33 +80,42 @@ void	*routine(void *arg)
 	while (1)
 	{
 		eating(pl, index);
-		if (pl->timesme == 1)
-			pl->tab[index]++;
-		sleeping(pl, index);
+		printing(pl, index, "is sleeping");
+		pthread_mutex_lock(&pl->print);
+		mysleep(pl->timetosleep);
+		printing(pl, index, "is thinking");
+		if(pl->p == 0)
+		{
+			pthread_mutex_unlock(&pl->print);
+			return (NULL);
+		}
+		pthread_mutex_unlock(&pl->print);
 	}
 	return (NULL);
 }
 
-int	traitingtreads(t_philo *gl, char **argv)
+int	traitingtreads(t_philo *gl)
 {
 	int			j;
-	pthread_t	*thread;
 
 	if (gl->numofphilo == 0)
 		return (0);
-	thread = malloc(sizeof(pthread_t) * gl->numofphilo);
+	gl->threads = malloc(sizeof(pthread_t) * gl->numofphilo);
 	gl->forks = malloc(sizeof(pthread_mutex_t) * gl->numofphilo);
 	j = -1;
 	while (++j < gl->numofphilo)
 		pthread_mutex_init(&gl->forks[j], NULL);
 	j = -1;
 	while (++j < gl->numofphilo)
-		gl->dl[j].end = time_now();
+	{
+		gl->end[j] = time_now();
+		gl->check1[j] = 0;
+	}
 	j = -1;
 	while (++j < gl->numofphilo)
 	{
 		gl->index = j;
-		pthread_create(&thread[j], NULL, &routine, gl);
+		pthread_create(gl->threads + j, NULL, &routine, gl);
 		usleep(100);
 	}
 	return (1);
